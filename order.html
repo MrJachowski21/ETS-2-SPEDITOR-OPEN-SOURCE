@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zlecenie Kierowcy</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .order {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .updates, .status-update {
+            margin-top: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Zlecenie Kierowcy</h1>
+        <div class="order">
+            <p><strong>Miejsce docelowe:</strong> <span id="destination"></span></p>
+            <p><strong>Ładunek:</strong> <span id="cargo"></span></p>
+            <p><strong>Waga:</strong> <span id="weight"></span> tony</p>
+            <p><strong>Termin dostawy:</strong> <span id="deadline"></span></p>
+            <p><strong>Uwagi:</strong> <span id="comments"></span></p>
+        </div>
+
+        <div class="status-update">
+            <label for="status">Zmień status:</label>
+            <select id="status">
+                <option value="W drodze">W drodze</option>
+                <option value="Dostarczono">Dostarczono</option>
+                <option value="Opóźnione">Opóźnione</option>
+            </select>
+            <button onclick="updateStatus()">Aktualizuj status</button>
+        </div>
+
+        <div class="updates">
+            <h2>Dodaj aktualizację:</h2>
+            <textarea id="updateText" rows="4" placeholder="Dodaj aktualizację..."></textarea>
+            <button onclick="addUpdate()">Dodaj aktualizację</button>
+        </div>
+
+        <div class="all-updates">
+            <h2>Wszystkie aktualizacje:</h2>
+            <div id="updatesList"></div>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const destination = urlParams.get('destination');
+        const cargo = urlParams.get('cargo');
+        const weight = urlParams.get('weight');
+        const deadline = urlParams.get('deadline');
+        const comments = urlParams.get('comments');
+        const orderId = destination + cargo + deadline;
+
+        document.getElementById('destination').textContent = destination;
+        document.getElementById('cargo').textContent = cargo;
+        document.getElementById('weight').textContent = weight;
+        document.getElementById('deadline').textContent = new Date(deadline).toLocaleString();
+        document.getElementById('comments').textContent = comments;
+
+        function getOrderData() {
+            return JSON.parse(localStorage.getItem(orderId)) || { status: '', updates: [] };
+        }
+
+        function saveOrderData(data) {
+            localStorage.setItem(orderId, JSON.stringify(data));
+        }
+
+        function updateStatus() {
+            const status = document.getElementById('status').value;
+            const orderData = getOrderData();
+            orderData.status = status;
+            saveOrderData(orderData);
+            alert('Status zaktualizowany!');
+        }
+
+        function addUpdate() {
+            const updateText = document.getElementById('updateText').value;
+            const orderData = getOrderData();
+            orderData.updates.push({ text: updateText, time: new Date().toLocaleString() });
+            saveOrderData(orderData);
+            document.getElementById('updateText').value = '';
+            displayUpdates();
+        }
+
+        function displayUpdates() {
+            const updatesList = document.getElementById('updatesList');
+            const orderData = getOrderData();
+            updatesList.innerHTML = '';
+            orderData.updates.forEach(update => {
+                const updateDiv = document.createElement('div');
+                updateDiv.className = 'update';
+                updateDiv.innerHTML = `
+                    <p>${update.text}</p>
+                    <small>${update.time}</small>
+                `;
+                updatesList.appendChild(updateDiv);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', displayUpdates);
+    </script>
+</body>
+</html>

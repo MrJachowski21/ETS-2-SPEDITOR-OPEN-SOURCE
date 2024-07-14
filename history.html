@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historia Zleceń</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .order {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .update {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            background-color: #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Historia Zleceń</h1>
+        <div id="orderHistory"></div>
+    </div>
+
+    <script>
+        function updateOrderHistory() {
+            const orderHistory = document.getElementById('orderHistory');
+            const orders = JSON.parse(localStorage.getItem('orders')) || [];
+            orderHistory.innerHTML = '';
+            
+            orders.forEach(order => {
+                const orderData = JSON.parse(localStorage.getItem(order.destination + order.cargo + order.deadline)) || {};
+                const orderDiv = document.createElement('div');
+                orderDiv.className = 'order';
+                orderDiv.innerHTML = `
+                    <p><strong>Miejsce docelowe:</strong> ${order.destination}</p>
+                    <p><strong>Ładunek:</strong> ${order.cargo}</p>
+                    <p><strong>Waga:</strong> ${order.weight} tony</p>
+                    <p><strong>Termin dostawy:</strong> ${new Date(order.deadline).toLocaleString()}</p>
+                    <p><strong>Uwagi:</strong> ${order.comments}</p>
+                    <p><strong>Status:</strong> ${orderData.status || 'Brak'}</p>
+                    <h3>Aktualizacje:</h3>
+                `;
+                
+                (orderData.updates || []).forEach(update => {
+                    const updateDiv = document.createElement('div');
+                    updateDiv.className = 'update';
+                    updateDiv.innerHTML = `
+                        <p>${update.text}</p>
+                        <small>${update.time}</small>
+                    `;
+                    orderDiv.appendChild(updateDiv);
+                });
+
+                orderHistory.appendChild(orderDiv);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', updateOrderHistory);
+    </script>
+</body>
+</html>

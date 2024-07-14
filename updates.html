@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aktualizacje od Kierowców</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .order {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .update {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            background-color: #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Aktualizacje od Kierowców</h1>
+        <div id="updatesContainer"></div>
+    </div>
+
+    <script>
+        function getOrders() {
+            const keys = Object.keys(localStorage);
+            const orders = keys.map(key => JSON.parse(localStorage.getItem(key)));
+            return orders;
+        }
+
+        function displayUpdates() {
+            const updatesContainer = document.getElementById('updatesContainer');
+            updatesContainer.innerHTML = '';
+            const orders = getOrders();
+            
+            orders.forEach(order => {
+                const orderDiv = document.createElement('div');
+                orderDiv.className = 'order';
+                orderDiv.innerHTML = `
+                    <p><strong>Miejsce docelowe:</strong> ${order.destination}</p>
+                    <p><strong>Ładunek:</strong> ${order.cargo}</p>
+                    <p><strong>Waga:</strong> ${order.weight} tony</p>
+                    <p><strong>Termin dostawy:</strong> ${new Date(order.deadline).toLocaleString()}</p>
+                    <p><strong>Uwagi:</strong> ${order.comments}</p>
+                    <p><strong>Status:</strong> ${order.status || 'Brak'}</p>
+                    <h3>Aktualizacje:</h3>
+                `;
+                
+                order.updates.forEach(update => {
+                    const updateDiv = document.createElement('div');
+                    updateDiv.className = 'update';
+                    updateDiv.innerHTML = `
+                        <p>${update.text}</p>
+                        <small>${update.time}</small>
+                    `;
+                    orderDiv.appendChild(updateDiv);
+                });
+
+                updatesContainer.appendChild(orderDiv);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', displayUpdates);
+    </script>
+</body>
+</html>
